@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_strings.dart';
+
 class ImagePreview extends StatelessWidget {
   const ImagePreview({
     super.key,
@@ -15,6 +17,7 @@ class ImagePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final strings = AppStrings.of(context);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -59,7 +62,7 @@ class ImagePreview extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'No image selected',
+                        strings.noImageTitle,
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: theme.colorScheme.onSurface
                               .withAlpha((0.7 * 255).round()),
@@ -67,7 +70,8 @@ class ImagePreview extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Use Camera or Gallery to start a scan.',
+                        strings.noImageSubtitle,
+                        textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurface
                               .withAlpha((0.6 * 255).round()),

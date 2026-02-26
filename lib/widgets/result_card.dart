@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_strings.dart';
+
 class ResultCard extends StatelessWidget {
   const ResultCard({
     super.key,
@@ -19,32 +21,34 @@ class ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final strings = AppStrings.of(context);
 
     Color statusColor = theme.colorScheme.outline;
     IconData statusIcon = Icons.help_outline_rounded;
-    String title = 'Awaiting scan';
-    String subtitle = 'Capture or pick an image to analyze cow health.';
+    String title = strings.awaitingTitle;
+    String subtitle = strings.awaitingSubtitle;
 
     if (errorMessage != null) {
       statusColor = theme.colorScheme.error;
       statusIcon = Icons.error_outline_rounded;
-      title = 'Error';
+      title = strings.errorTitle;
       subtitle = errorMessage!;
     } else if (noDetection) {
       statusColor = theme.colorScheme.secondary;
       statusIcon = Icons.search_off_rounded;
-      title = 'No cow detected';
-      subtitle = 'Please try again with a clearer view of the cow.';
+      title = strings.noCowDetectedTitle;
+      subtitle = strings.noCowDetectedSubtitle;
     } else if (label != null && confidence != null && statusText != null) {
       final bool isLumpy = label!.toLowerCase().contains('lumpy');
       statusColor = isLumpy ? Colors.redAccent : Colors.green;
-      statusIcon = isLumpy
-          ? Icons.sick_rounded
-          : Icons.check_circle_rounded;
+      statusIcon =
+          isLumpy ? Icons.sick_rounded : Icons.check_circle_rounded;
 
-      title = 'Prediction: $label';
-      subtitle =
-          'Status: $statusText\nConfidence: ${(confidence! * 100).toStringAsFixed(1)}%';
+      title = strings.predictionTitle(label!);
+      subtitle = strings.predictionSubtitle(
+        statusText: statusText!,
+        confidence: confidence!,
+      );
     }
 
     return Card(

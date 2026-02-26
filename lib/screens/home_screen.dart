@@ -2,7 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_gallery_saver/flutter_image_gallery_saver.dart';
 
+import '../l10n/app_strings.dart';
 import '../ml/pipeline_service.dart';
 import '../widgets/image_preview.dart';
 import '../widgets/result_card.dart';
@@ -25,9 +27,39 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
+  Future<void> _saveToGallery() async {
+    final strings = AppStrings.of(context);
+    final bytes = _displayImageBytes;
+
+    if (bytes == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(strings.downloadNoImage)),
+      );
+      return;
+    }
+
+    try {
+      final saver = ImageGallerySaver();
+      await saver.saveImage(bytes);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            strings.downloadSuccess,
+          ),
+        ),
+      );
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(strings.downloadFailure)),
+      );
+    }
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     setState(() {
       _errorMessage = null;
+      _isLoading = true;
     });
 
     try {
@@ -37,13 +69,21 @@ class _HomeScreenState extends State<HomeScreen> {
         maxHeight: 2048,
       );
 
-      if (picked == null) return;
+      if (picked == null) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+        return;
+      }
 
       final Uint8List bytes = await picked.readAsBytes();
 
+      if (!mounted) return;
+
       setState(() {
         _displayImageBytes = bytes;
-        _isLoading = true;
         _label = null;
         _confidence = null;
         _statusText = null;
@@ -86,6 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final strings = AppStrings.of(context);
 
     return Scaffold(
       body: SafeArea(
@@ -94,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SliverAppBar(
               pinned: true,
               title: Text(
-                'Cow Health Scanner',
+                strings.appTitle,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -111,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'AI-powered lumpy skin disease detection',
+                      strings.tagline,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface
                             .withAlpha((0.7 * 255).round()),
@@ -133,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             onPressed:
                                 _isLoading ? null : () => _pickImage(ImageSource.camera),
                             icon: const Icon(Icons.photo_camera_rounded),
-                            label: const Text('Camera'),
+                          label: Text(strings.cameraButton),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -150,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             onPressed:
                                 _isLoading ? null : () => _pickImage(ImageSource.gallery),
                             icon: const Icon(Icons.photo_library_rounded),
-                            label: const Text('Gallery'),
+                          label: Text(strings.galleryButton),
                           ),
                         ),
                       ],
@@ -171,6 +212,23 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SliverToBoxAdapter(
               child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: FilledButton.icon(
+                  onPressed: _isLoading ? null : _saveToGallery,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                  icon: const Icon(Icons.download_rounded),
+                  label: Text(AppStrings.of(context).downloadButton),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: ResultCard(
                   label: _label,
@@ -178,6 +236,37 @@ class _HomeScreenState extends State<HomeScreen> {
                   statusText: _statusText,
                   noDetection: _noDetection,
                   errorMessage: _errorMessage,
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  strings.guidelinesTitle,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      strings.guidelinesBody,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        height: 1.4,
+                        color: theme.colorScheme.onSurface
+                            .withAlpha((0.8 * 255).round()),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
