@@ -24,8 +24,7 @@ class DetectionBox {
   bool get isValid => width > 1 && height > 1 && score > 0;
 }
 
-/// YOLOv8 detector service.
-///
+
 /// - Loads `models/detector/yolo26n_float32.tflite` once.
 /// - Expects 640x640x3 float32 input, normalized to 0–1.
 /// - Uses Ultralytics end-to-end export which returns pre-NMS detections.
