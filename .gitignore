@@ -59,3 +59,10 @@ app.*.map.json
 *.index
 models/variables.data-00000-of-00001
 *variables
+# Keep the TFLite models the app bundles as assets (see pubspec.yaml)
+!models/*.tflite
+!models/detector/*.tflite
+
+# Local tooling / build output
+.claude/settings.local.json
+android/build/

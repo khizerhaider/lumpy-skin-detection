@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(ls -lh /c/Users/HP/Desktop/github/Lumpy/lumpy_skin/models/*.tflite /c/Users/HP/Desktop/github/Lumpy/lumpy_skin/models/detector/*.tflite)"
-    ]
-  }
-}

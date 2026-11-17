@@ -290,18 +290,15 @@ TFLite runs the model graph. With `numThreads: 2`, it can parallelize tensor ope
 
 #### 3d. Output Parsing — The Most Complex Part
 
-The YOLOv8 TFLite export can produce outputs in different layouts depending on the export configuration. The service tries four layouts in order:
+The detector is an Ultralytics end-to-end export (`end2end: true`), so its output is `[1, 300, 6]` with each row laid out as:
 
-| Layout Name | Format |
+| Field | Meaning |
 |---|---|
-| `xyxyScoreClass` | x1, y1, x2, y2, score, classIndex |
-| `xyxyClassScore` | x1, y1, x2, y2, classIndex, score |
-| `xywhScoreClass` | xCenter, yCenter, width, height, score, classIndex |
-| `xywhClassScore` | xCenter, yCenter, width, height, classIndex, score |
+| `x1, y1, x2, y2` | Box corners, normalized to 0–1 |
+| `score` | Confidence |
+| `classIndex` | COCO class id |
 
-For each layout, it filters boxes with `score > 0.25` (confidence threshold). If no boxes pass this threshold, it falls back to `score > 0.05` and picks the box with the best `area × score` product.
-
-**Why try multiple layouts?:** TFLite exports from different versions of Ultralytics can have different output orderings. This defensive parsing ensures the app works with model variants without requiring a specific export flag.
+Boxes with `score >= 0.25` are kept. If none pass, the service falls back to `score >= 0.05` and picks the box with the best `area × score` product.
 
 **Coordinate normalization detection:**
 ```dart

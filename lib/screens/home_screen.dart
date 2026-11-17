@@ -29,10 +29,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveToGallery() async {
     final strings = AppStrings.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final bytes = _displayImageBytes;
 
     if (bytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text(strings.downloadNoImage)),
       );
       return;
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final saver = ImageGallerySaver();
       await saver.saveImage(bytes);
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(
             strings.downloadSuccess,
@@ -50,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     } catch (_) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text(strings.downloadFailure)),
       );
     }
